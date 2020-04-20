@@ -25,9 +25,6 @@ def after_request(response):
     return response
 
 ## ROUTES
-@app.route('/')
-def home():
-    return 'Home'
 
 '''
 @TODO implement endpoint
@@ -39,9 +36,14 @@ def home():
 '''
 @app.route('/drinks')
 def get_drinks():
-    drinks = Drink.query.order_by(Drink.id).all()
-    drinks = [drink.short() for drink in drinks]
-    return jsonify({"success": True, "drinks": drinks})
+    try:
+        drinks = [drink.short() for drink in Drink.query.all()]
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        }), 200
+    except Exception:
+        abort(404)
 
 
 '''
@@ -161,6 +163,21 @@ def not_found(error):
                     "message": "resource not found"
                     }), 404
 
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({
+        'success': False,
+        'error': 405,
+        'message': 'method not allowed'
+    }, 405)
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return jsonify({
+        'success': False,
+        'error': 500,
+        'message': 'Internal Server Error'
+    }, 500)
 
 '''
 @TODO implement error handler for AuthError
